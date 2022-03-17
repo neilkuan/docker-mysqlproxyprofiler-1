@@ -77,3 +77,32 @@ In term of profiling and optimizations: have a look at [Blackfire.io](https://bl
 ## Special thanks
 
 - Patrick Allaert, for this `debug.lua` script: https://github.com/patrickallaert/MySQL-Proxy-scripts-for-devs
+
+
+
+## Deploy to k8s cluster
+see: [k8s-deployments.yaml](./k8s-deployments.yaml)
+```yaml
+# edit line 31 to your db host and port
+# example: "host:port" -> mysql.example.com:3306
+value: "mysql.example.com:3306"
+```
+
+### Deploy to k8s
+```bash
+kubectl apply -f k8s-deployments.yaml
+```
+
+### Start the db proxy
+```bash
+# example
+kubectl get pod -l 'app=proxysql'
+NAME                        READY   STATUS    RESTARTS   AGE
+proxysql-5d6d74cc44-hpjzm   1/1     Running   0          9m44s
+
+kubectl port-forward pod/proxysql-5d6d74cc44-hpjzm 3306:3306
+
+or
+
+kubectl port-forward pod/$(kubectl get pod -l 'app=proxysql' -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}') 3306:3306
+```
